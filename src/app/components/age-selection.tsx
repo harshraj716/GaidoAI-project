@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import type { Member } from "./insurance-form"
+import type { Member } from "../../store/useInsuranceStore"
 
 interface AgeSelectionProps {
   members: Member[]

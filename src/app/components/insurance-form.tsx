@@ -1,12 +1,15 @@
-"use client";
+"use client"
 
-import { Card, CardContent } from "@/components/ui/card";
-import MemberSelection from "./member-selection";
-import AgeSelection from "./age-selection";
-import CitySelection from "./city-selection";
-import MedicalHistory from "./medical-history";
-import Confirmation from "./confirmation";
-import { useInsuranceStore } from "./useInsuranceStore";
+import { useEffect, useState } from "react"
+import { useInsuranceStore } from "../../store/useInsuranceStore"
+import { Card, CardContent } from "@/components/ui/card"
+import MemberSelection from "./member-selection"
+import AgeSelection from "./age-selection"
+import CitySelection from "./city-selection"
+import MedicalHistory from "./medical-history"
+import Confirmation from "./confirmation"
+import SubmissionComplete from "./submission-complete"
+import LoadingSpinner from "./loading-spinner" // You'll need to create this component
 
 export default function InsuranceForm() {
   const {
@@ -21,50 +24,61 @@ export default function InsuranceForm() {
     conditions,
     whatsappUpdates,
     setMedicalHistory,
-  } = useInsuranceStore();
+    resetForm,
+  } = useInsuranceStore()
+
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // This effect will run after the initial render
+    setIsLoading(false)
+  }, [])
 
   const handleContinue = () => {
     switch (currentScreen) {
       case "members":
-        setCurrentScreen("age");
-        break;
+        setCurrentScreen("age")
+        break
       case "age":
-        setCurrentScreen("city");
-        break;
+        setCurrentScreen("city")
+        break
       case "city":
-        setCurrentScreen("medical");
-        break;
+        setCurrentScreen("medical")
+        break
       case "medical":
-        setCurrentScreen("confirmation");
-        break;
+        setCurrentScreen("confirmation")
+        break
       case "confirmation":
-        console.log("Final form submission:", {
-          gender,
-          members,
-          city,
-          conditions,
-          whatsappUpdates,
-        });
-        break;
+        setCurrentScreen("submissionComplete")
+        break
     }
-  };
+  }
 
   const handleBack = () => {
     switch (currentScreen) {
       case "age":
-        setCurrentScreen("members");
-        break;
+        setCurrentScreen("members")
+        break
       case "city":
-        setCurrentScreen("age");
-        break;
+        setCurrentScreen("age")
+        break
       case "medical":
-        setCurrentScreen("city");
-        break;
+        setCurrentScreen("city")
+        break
       case "confirmation":
-        setCurrentScreen("medical");
-        break;
+        setCurrentScreen("medical")
+        break
     }
-  };
+  }
+
+  const handleMainMenu = () => {
+    resetForm()
+    setCurrentScreen("members")
+  }
+
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
 
   return (
     <Card className="w-full">
@@ -80,20 +94,15 @@ export default function InsuranceForm() {
         )}
 
         {currentScreen === "age" && (
-          <AgeSelection
-            members={members}
-            setMembers={setMembers}
-            onBack={handleBack}
-            onContinue={handleContinue}
-          />
+          <AgeSelection members={members} setMembers={setMembers} onBack={handleBack} onContinue={handleContinue} />
         )}
 
         {currentScreen === "city" && (
           <CitySelection
             onBack={handleBack}
             onContinue={(city) => {
-              setCity(city);
-              handleContinue();
+              setCity(city)
+              handleContinue()
             }}
           />
         )}
@@ -102,8 +111,8 @@ export default function InsuranceForm() {
           <MedicalHistory
             onBack={handleBack}
             onContinue={(data) => {
-              setMedicalHistory(data.conditions, data.whatsappUpdates);
-              handleContinue();
+              setMedicalHistory(data.conditions, data.whatsappUpdates)
+              handleContinue()
             }}
           />
         )}
@@ -115,261 +124,15 @@ export default function InsuranceForm() {
             onSubmit={handleContinue}
           />
         )}
+
+        {currentScreen === "submissionComplete" && (
+          <SubmissionComplete
+            formData={{ gender, members, city, conditions, whatsappUpdates }}
+            onMainMenu={handleMainMenu}
+          />
+        )}
       </CardContent>
     </Card>
-  );
+  )
 }
-
-
-//correct code 
-
-// "use client"
-
-// import { useState } from "react"
-// import MemberSelection from "./member-selection"
-// import AgeSelection from "./age-selection"
-// import CitySelection from "./city-selection"
-// import MedicalHistory from "./medical-history"
-// import Confirmation from "./confirmation"
-// import { Card, CardContent } from "@/components/ui/card"
-
-// export type Member = {
-//   type: "self" | "wife" | "son" | "daughter" | "father" | "mother"
-//   id: string
-//   age?: number
-// }
-
-// export type Gender = "male" | "female"
-
-// type Screen = "members" | "age" | "city" | "medical" | "confirmation"
-
-// export default function InsuranceForm() {
-//   const [currentScreen, setCurrentScreen] = useState<Screen>("members")
-//   const [formData, setFormData] = useState({
-//     gender: "male" as Gender,
-//     members: [] as Member[], // Start with empty array instead of including self
-//     city: "",
-//     conditions: [] as string[],
-//     whatsappUpdates: true,
-//   })
-
-//   const handleContinue = () => {
-//     switch (currentScreen) {
-//       case "members":
-//         setCurrentScreen("age")
-//         break
-//       case "age":
-//         setCurrentScreen("city")
-//         break
-//       case "city":
-//         setCurrentScreen("medical")
-//         break
-//       case "medical":
-//         setCurrentScreen("confirmation")
-//         break
-//       case "confirmation":
-//         console.log("Final form submission:", formData)
-//         // Handle form submission here
-//         break
-//     }
-//   }
-
-//   const handleBack = () => {
-//     switch (currentScreen) {
-//       case "age":
-//         setCurrentScreen("members")
-//         break
-//       case "city":
-//         setCurrentScreen("age")
-//         break
-//       case "medical":
-//         setCurrentScreen("city")
-//         break
-//       case "confirmation":
-//         setCurrentScreen("medical")
-//         break
-//     }
-//   }
-
-//   return (
-//     <Card className="w-full">
-//       <CardContent className="p-6">
-//         {currentScreen === "members" && (
-//           <MemberSelection
-//             gender={formData.gender}
-//             setGender={(gender) => setFormData({ ...formData, gender })}
-//             members={formData.members}
-//             setMembers={(members) => setFormData({ ...formData, members })}
-//             onContinue={handleContinue}
-//           />
-//         )}
-
-//         {currentScreen === "age" && (
-//           <AgeSelection
-//             members={formData.members}
-//             setMembers={(members) => setFormData({ ...formData, members })}
-//             onBack={handleBack}
-//             onContinue={handleContinue}
-//           />
-//         )}
-
-//         {currentScreen === "city" && (
-//           <CitySelection
-//             onBack={handleBack}
-//             onContinue={(city) => {
-//               setFormData({ ...formData, city })
-//               handleContinue()
-//             }}
-//           />
-//         )}
-
-//         {currentScreen === "medical" && (
-//           <MedicalHistory
-//             onBack={handleBack}
-//             onContinue={(data) => {
-//               setFormData({
-//                 ...formData,
-//                 conditions: data.conditions,
-//                 whatsappUpdates: data.whatsappUpdates,
-//               })
-//               handleContinue()
-//             }}
-//           />
-//         )}
-
-//         {currentScreen === "confirmation" && (
-//           <Confirmation formData={formData} onBack={handleBack} onSubmit={handleContinue} />
-//         )}
-//       </CardContent>
-//     </Card>
-//   )
-// }
-
-
-
-
-
-
-
-// "use client"
-
-// import { useState } from "react"
-// import MemberSelection from "./member-selection"
-// import AgeSelection from "./age-selection"
-// import CitySelection from "./city-selection"
-// import MedicalHistory from "./medical-history"
-// import Confirmation from "./confirmation"
-// import { Card, CardContent } from "@/components/ui/card"
-
-// export type Member = {
-//   type: "self" | "wife" | "son" | "daughter" | "father" | "mother"
-//   id: string
-//   age?: number
-// }
-
-// export type Gender = "male" | "female"
-
-// type Screen = "members" | "age" | "city" | "medical" | "confirmation"
-
-// export default function InsuranceForm() {
-//   const [currentScreen, setCurrentScreen] = useState<Screen>("members")
-//   const [formData, setFormData] = useState({
-//     gender: "male" as Gender,
-//     members: [] as Member[], // Start with empty array instead of including self
-//     city: "",
-//     conditions: [] as string[],
-//     whatsappUpdates: true,
-//   })
-
-//   const handleContinue = () => {
-//     switch (currentScreen) {
-//       case "members":
-//         setCurrentScreen("age")
-//         break
-//       case "age":
-//         setCurrentScreen("city")
-//         break
-//       case "city":
-//         setCurrentScreen("medical")
-//         break
-//       case "medical":
-//         setCurrentScreen("confirmation")
-//         break
-//       case "confirmation":
-//         console.log("Final form submission:", formData)
-//         // Handle form submission here
-//         break
-//     }
-//   }
-
-//   const handleBack = () => {
-//     switch (currentScreen) {
-//       case "age":
-//         setCurrentScreen("members")
-//         break
-//       case "city":
-//         setCurrentScreen("age")
-//         break
-//       case "medical":
-//         setCurrentScreen("city")
-//         break
-//       case "confirmation":
-//         setCurrentScreen("medical")
-//         break
-//     }
-//   }
-
-//   return (
-//     <Card className="w-full">
-//       <CardContent className="p-6">
-//         {currentScreen === "members" && (
-//           <MemberSelection
-//             gender={formData.gender}
-//             setGender={(gender) => setFormData({ ...formData, gender })}
-//             members={formData.members}
-//             setMembers={(members) => setFormData({ ...formData, members })}
-//             onContinue={handleContinue}
-//           />
-//         )}
-
-//         {currentScreen === "age" && (
-//           <AgeSelection
-//             members={formData.members}
-//             setMembers={(members) => setFormData({ ...formData, members })}
-//             onBack={handleBack}
-//             onContinue={handleContinue}
-//           />
-//         )}
-
-//         {currentScreen === "city" && (
-//           <CitySelection
-//             onBack={handleBack}
-//             onContinue={(city) => {
-//               setFormData({ ...formData, city })
-//               handleContinue()
-//             }}
-//           />
-//         )}
-
-//         {currentScreen === "medical" && (
-//           <MedicalHistory
-//             onBack={handleBack}
-//             onContinue={(data) => {
-//               setFormData({
-//                 ...formData,
-//                 conditions: data.conditions,
-//                 whatsappUpdates: data.whatsappUpdates,
-//               })
-//               handleContinue()
-//             }}
-//           />
-//         )}
-
-//         {currentScreen === "confirmation" && (
-//           <Confirmation formData={formData} onBack={handleBack} onSubmit={handleContinue} />
-//         )}
-//       </CardContent>
-//     </Card>
-//   )
-// }
 

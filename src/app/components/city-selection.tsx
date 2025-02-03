@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Building, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { useState } from "react"
+import { useInsuranceStore } from "../../store/useInsuranceStore"
 
 interface CitySelectionProps {
   onBack: () => void
@@ -46,12 +47,14 @@ const stateCapitals = [
 ]
 
 export default function CitySelection({ onBack, onContinue }: CitySelectionProps) {
-  const [selectedCity, setSelectedCity] = useState<string>("")
+  const { city, setCity } = useInsuranceStore()
+  const [selectedCity, setSelectedCity] = useState<string>(city)
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [showSuggestions, setShowSuggestions] = useState(false)
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city)
+    setCity(city)
     setSearchQuery(city)
     setShowSuggestions(false)
   }

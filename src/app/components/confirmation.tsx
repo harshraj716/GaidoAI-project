@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Check, ChevronLeft, User } from "lucide-react"
-import type { Member } from "./insurance-form"
+import type { Member } from "../../store/useInsuranceStore"
 
 interface ConfirmationProps {
   formData: {

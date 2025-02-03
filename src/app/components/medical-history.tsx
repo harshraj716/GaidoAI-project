@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react"
 import { useState } from "react"
+import { useInsuranceStore } from "../../store/useInsuranceStore"
 
 interface MedicalHistoryProps {
   onBack: () => void
@@ -26,25 +27,24 @@ const medicalConditions = [
 ]
 
 export default function MedicalHistory({ onBack, onContinue }: MedicalHistoryProps) {
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([])
-  const [whatsappUpdates, setWhatsappUpdates] = useState(true)
+  const { conditions, whatsappUpdates, setMedicalHistory } = useInsuranceStore()
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(conditions)
+  const [whatsappUpdatesState, setWhatsappUpdatesState] = useState(whatsappUpdates)
 
   const handleConditionToggle = (condition: string) => {
+    let newConditions: string[]
     if (condition === "none") {
-      // If "None of These" is selected, clear other selections
-      setSelectedConditions(selectedConditions.includes("none") ? [] : ["none"])
+      newConditions = selectedConditions.includes("none") ? [] : ["none"]
     } else {
-      setSelectedConditions((prev) => {
-        // Remove "None of These" if other conditions are selected
-        const withoutNone = prev.filter((c) => c !== "none")
-
-        if (prev.includes(condition)) {
-          return withoutNone.filter((c) => c !== condition)
-        } else {
-          return [...withoutNone, condition]
-        }
-      })
+      const withoutNone = selectedConditions.filter((c) => c !== "none")
+      if (selectedConditions.includes(condition)) {
+        newConditions = withoutNone.filter((c) => c !== condition)
+      } else {
+        newConditions = [...withoutNone, condition]
+      }
     }
+    setSelectedConditions(newConditions)
+    setMedicalHistory(newConditions, whatsappUpdatesState)
   }
 
   return (
@@ -90,7 +90,14 @@ export default function MedicalHistory({ onBack, onContinue }: MedicalHistoryPro
           <label htmlFor="whatsapp" className="text-sm font-medium">
             Get Updates on WhatsApp
           </label>
-          <Switch id="whatsapp" checked={whatsappUpdates} onCheckedChange={setWhatsappUpdates} />
+          <Switch
+            id="whatsapp"
+            checked={whatsappUpdatesState}
+            onCheckedChange={(checked) => {
+              setWhatsappUpdatesState(checked)
+              setMedicalHistory(selectedConditions, checked)
+            }}
+          />
         </div>
       </div>
 
@@ -98,7 +105,7 @@ export default function MedicalHistory({ onBack, onContinue }: MedicalHistoryPro
         onClick={() =>
           onContinue({
             conditions: selectedConditions,
-            whatsappUpdates,
+            whatsappUpdates: whatsappUpdatesState,
           })
         }
         className="w-full mt-6 flex items-center justify-center gap-2"
@@ -109,4 +116,5 @@ export default function MedicalHistory({ onBack, onContinue }: MedicalHistoryPro
     </>
   )
 }
+
 
